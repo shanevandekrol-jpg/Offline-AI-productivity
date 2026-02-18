@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offline AI Productivity</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+  h1 { text-align: center; }
+  .task-list { margin-top: 20px; }
+  .task { background: #fff; padding: 10px; margin: 5px 0; border-radius: 8px; }
+  #nextTask { background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+  input, button { padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #ccc; }
+  button { cursor: pointer; background: #4CAF50; color: white; border: none; }
+</style>
+</head>
+<body>
+
+<h1>Offline AI Productivity</h1>
+
+<div id="energyLevel">Energy Level: 5 / 10</div>
+
+<div id="nextTask">Next Task: None</div>
+
+<input type="text" id="taskInput" placeholder="Add a new task">
+<input type="number" id="priorityInput" placeholder="Priority 1-10" min="1" max="10">
+<input type="number" id="difficultyInput" placeholder="Difficulty 1-10" min="1" max="10">
+<button onclick="addTask()">Add Task</button>
+<button onclick="showNextTask()">Next Task</button>
+
+<div class="task-list" id="taskList"></div>
+
+<script>
+let tasks = [];
+let energyLevel = 5; // Simulated energy (0-10)
+
+// Simulate energy: random fluctuation every 5 sec
+setInterval(() => {
+  energyLevel = Math.max(0, Math.min(10, energyLevel + (Math.random() * 2 - 1)));
+  document.getElementById('energyLevel').innerText = `Energy Level: ${energyLevel.toFixed(1)} / 10`;
+}, 5000);
+
+function addTask() {
+  const title = document.getElementById('taskInput').value;
+  const priority = parseInt(document.getElementById('priorityInput').value) || 5;
+  const difficulty = parseInt(document.getElementById('difficultyInput').value) || 5;
+  if(title.trim() === '') return;
+
+  tasks.push({title, priority, difficulty});
+  document.getElementById('taskInput').value = '';
+  document.getElementById('priorityInput').value = '';
+  document.getElementById('difficultyInput').value = '';
+  renderTasks();
+}
+
+function renderTasks() {
+  const listDiv = document.getElementById('taskList');
+  listDiv.innerHTML = '';
+  tasks.forEach((t, index) => {
+    const div = document.createElement('div');
+    div.className = 'task';
+    div.innerHTML = `<b>${t.title}</b> | Priority: ${t.priority} | Difficulty: ${t.difficulty}
+                     <button onclick="removeTask(${index})" style="float:right;background:red;">X</button>`;
+    listDiv.appendChild(div);
+  });
+}
+
+function removeTask(index) {
+  tasks.splice(index, 1);
+  renderTasks();
+}
+
+function showNextTask() {
+  if(tasks.length === 0) {
+    document.getElementById('nextTask').innerText = 'Next Task: None';
+    return;
+  }
+
+  // AI-like scoring: (priority*2 + energyLevel - difficulty)
+  tasks.sort((a,b) => (b.priority*2 + energyLevel - b.difficulty) - (a.priority*2 + energyLevel - a.difficulty));
+  const next = tasks[0];
+  document.getElementById('nextTask').innerText = `Next Task: ${next.title} | Priority: ${next.priority} | Difficulty: ${next.difficulty}`;
+}
+
+// Optional: Keyboard Enter adds task
+document.getElementById('taskInput').addEventListener('keypress', function(e){
+  if(e.key === 'Enter') addTask();
+});
+</script>
+
+</body>
+</html>
